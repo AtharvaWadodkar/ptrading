@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
 import { io } from "socket.io-client";
 import TradingChart from "./TradingChart";
 import Login from "./Login";
+import Portfolio from "./Portfolio";
 import "./App.css";
 import RiskModal from "./RiskModal";
 
@@ -16,6 +17,7 @@ function TradingComponent() {
   const [stockSymbol, setStockSymbol] = useState("AAPL");
   const [tradeSuccess, setTradeSuccess] = useState(null);
   const [showRiskModal, setShowRiskModal] = useState(true);
+  const [activeTab, setActiveTab] = useState("trade"); // 'trade' or 'portfolio'
 
   useEffect(() => {
     socket.on("priceUpdate", (data) => {
@@ -83,56 +85,94 @@ function TradingComponent() {
           </div>
         </div>
 
-        <div className="sidebar-inputs">
-          <label className="sidebar-label">Stock Symbol</label>
-          <input
-            type="text"
-            value={stockSymbol}
-            onChange={changeStock}
-            placeholder="AAPL, TSLA..."
-          />
-        </div>
-
-        <div className="sidebar-price">
-          <label className="sidebar-label">Current Price</label>
-          <div className="sidebar-price-amount">
-            {price ? `$${price}` : "Loading..."}
+        <div className="sidebar-navigation" style={{ marginTop: "20px" }}>
+          <div 
+            className={`sidebar-nav-item ${activeTab === "trade" ? "active" : ""}`} 
+            onClick={() => setActiveTab("trade")}
+            style={{ 
+              padding: "12px 16px", 
+              borderRadius: "8px", 
+              cursor: "pointer", 
+              background: activeTab === "trade" ? "rgba(255, 255, 255, 0.1)" : "transparent",
+              marginBottom: "10px"
+            }}
+          >
+            Trading
+          </div>
+          <div 
+            className={`sidebar-nav-item ${activeTab === "portfolio" ? "active" : ""}`}
+            onClick={() => setActiveTab("portfolio")}
+            style={{ 
+              padding: "12px 16px", 
+              borderRadius: "8px", 
+              cursor: "pointer", 
+              background: activeTab === "portfolio" ? "rgba(255, 255, 255, 0.1)" : "transparent" 
+            }}
+          >
+            Portfolio
           </div>
         </div>
+
+        {activeTab === "trade" && (
+          <>
+            <div className="sidebar-inputs">
+              <label className="sidebar-label">Stock Symbol</label>
+              <input
+                type="text"
+                value={stockSymbol}
+                onChange={changeStock}
+                placeholder="AAPL, TSLA..."
+              />
+            </div>
+
+            <div className="sidebar-price">
+              <label className="sidebar-label">Current Price</label>
+              <div className="sidebar-price-amount">
+                {price ? `$${price}` : "Loading..."}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* MAIN CONTENT */}
       <div className="main-content">
-        <div className="chart-container">
-          <TradingChart symbol={`NASDAQ:${stockSymbol}`} />
-        </div>
+        {activeTab === "trade" ? (
+          <>
+            <div className="chart-container">
+              <TradingChart symbol={`NASDAQ:${stockSymbol}`} />
+            </div>
 
-        <div className="trading-panel">
-          <h2>Trade {stockSymbol}</h2>
+            <div className="trading-panel">
+              <h2>Trade {stockSymbol}</h2>
 
-          <div className="input-group">
-            <label>Quantity</label>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Enter number of shares"
-            />
-          </div>
+              <div className="input-group">
+                <label>Quantity</label>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="Enter number of shares"
+                />
+              </div>
 
-          <div className="cost-display">
-            <strong>Total Cost:</strong> ${totalCost}
-          </div>
+              <div className="cost-display">
+                <strong>Total Cost:</strong> ${totalCost}
+              </div>
 
-          <div className="trade-buttons">
-            <button className="buy-btn" onClick={() => executeTrade("buy")}>
-              Buy
-            </button>
-            <button className="sell-btn" onClick={() => executeTrade("sell")}>
-              Sell
-            </button>
-          </div>
-        </div>
+              <div className="trade-buttons">
+                <button className="buy-btn" onClick={() => executeTrade("buy")}>
+                  Buy
+                </button>
+                <button className="sell-btn" onClick={() => executeTrade("sell")}>
+                  Sell
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <Portfolio balance={balance} socket={socket} />
+        )}
       </div>
 
       {/* FLOATING NOTIFICATION */}
