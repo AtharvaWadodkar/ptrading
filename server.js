@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const mongoose = require("mongoose");
 const User = require("./models/User");
 
-mongoose.connect('mongodb+srv://dbUser:iampassword123@cluster0.a6arr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect('mongodb+srv://dbUser:YOUR_PASSWORD@cluster0.a6arr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -30,7 +30,7 @@ const io = socketIo(server, {
   }
 });
 
-const API_KEY = "cv8tj0pr01qk2jfsgep0cv8tj0pr01qk2jfsgepg";
+const API_KEY = "API_KEY";
 let SYMBOL = "AAPL";
 const PORT = process.env.PORT || 5000;
 
